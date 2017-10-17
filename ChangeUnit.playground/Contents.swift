@@ -12,12 +12,6 @@ var meter_to_cm = Int(meter*100
 print(meter, "m를 ",meter_to_cm, "cm로 출력한다.")
 */
 
-let calc_val = 100.0
-var value : String = "183cm"
-//var value = "3.14m"
-
-var result = Convert(value: value)
-print("\(result)","m")
 
 func Convert (value: String) -> String {
     var result : String = ""
@@ -34,3 +28,11 @@ func Convert (value: String) -> String {
     }
     return result
 }
+
+let calc_val = 100.0
+var value : String = "183cm"
+//var value = "3.14m"
+
+var result = Convert(value: value)
+print("\(result)","m")
+
