@@ -14,6 +14,7 @@ print(meter, "m를 ",meter_to_cm, "cm로 출력한다.")
 
 
 func Convert (value: String) -> String {
+    let calc_val = 100.0
     var result : String = ""
     if value.contains("cm") {
         let endIndex = value.index(of: "c") ?? value.endIndex
@@ -28,10 +29,9 @@ func Convert (value: String) -> String {
     }
     return result
 }
-
-let calc_val = 100.0
+//let value = readLine()
 var value : String = "183cm"
-//var value = "3.14m"
+var value = "3.14m"
 
 var result = Convert(value: value)
 print("\(result)","m")
