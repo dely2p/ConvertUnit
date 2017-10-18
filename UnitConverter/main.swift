@@ -7,7 +7,11 @@
 //
 
 import Foundation
-var Unit = ["cm", "m"]
+/*
+ let Unit : [String] = [] //["inch","cm","m"]
+ let UnitDictionary : [String : Unit] = ["inch" : [2.54, 0.0254, 0]]
+ */
+let Unit = ["inch","cm","m"]
 let calc_val = 100.0
 
 func SeperateUnit (value: String) -> (num: Double,unit: String) {
@@ -24,27 +28,74 @@ func SeperateUnit (value: String) -> (num: Double,unit: String) {
             break
         }
     }
-    if(num != nil){
-        //print(num!, String(unit))
-    }else{
-        //print("num is nil")
-        //print("unit: ",unit)
-    }
     return (num!,String(unit))
-//    return (0.1,"")
+}
+func GetVal_ConvertVal(value: String)-> (inputVal: String,convertUnit: String){
+    let tmp = value.split(separator: " ")
+    let inputVal = String(tmp[0])
+    var convertUnit = " "
+    if value.contains(" ") {
+        convertUnit = String(tmp[1])
+    }
+    return (inputVal, convertUnit)
+}
+func Cm_to_M(num: Double) -> Double{
+    return num*0.01
+}
+func M_to_Cm(num: Double) -> Double{
+    return num*100
+}
+func Cm_to_Inch(num: Double) -> Double{
+    return num*0.393701
+}
+func Inch_to_Cm(num: Double) -> Double{
+    return num*2.54
+}
+func Inch_to_M(num: Double) -> Double{
+    return Cm_to_M(num: Inch_to_Cm(num: num))
+}
+func M_to_Inch(num: Double) -> Double{
+    return Cm_to_Inch(num: M_to_Cm(num: num))
 }
 
-func Convert (str: String) -> String {
-    
-    let sepValue = SeperateUnit(value: "\(str)")
-    var result : String = ""
-    
-    if sepValue.unit=="cm"{ // cm to m
-        result = "\(sepValue.num/calc_val)m"
-    }else if sepValue.unit=="m" { // m to cm
-        result = "\(Int(sepValue.num*calc_val))cm"
+func UnitConvertor (num: Double, inputUnit: String, convertUnit: String) -> (num: Double, convertUnit: String) {
+    var convtNum = 0.0
+    var convtUnit = ""
+    if(inputUnit=="cm" && (convertUnit=="m" || convertUnit==" ")){
+        convtNum = Cm_to_M(num: num)
+        convtUnit = "m"
+    } else if(inputUnit=="m" && (convertUnit=="cm" || convertUnit==" ")){
+        convtNum = M_to_Cm(num: num)
+        convtUnit = "cm"
+    } else if(inputUnit=="cm" && convertUnit=="inch"){
+        convtNum = Cm_to_Inch(num: num)
+        convtUnit = convertUnit
+    } else if(inputUnit=="inch" && convertUnit=="cm"){
+        convtNum = Inch_to_Cm(num: num)
+        convtUnit = convertUnit
+    } else if(inputUnit=="inch" && convertUnit=="m"){
+        convtNum = Inch_to_M(num: num)
+        convtUnit = convertUnit
+    } else if(inputUnit=="m" && convertUnit=="inch"){
+        convtNum = M_to_Inch(num: num)
+        convtUnit = convertUnit
+    } else if(!Unit.contains(inputUnit) || !Unit.contains(convertUnit)){
+        print("지원하지 않는 단위입니다.")
+        return (0.0,"")
     }
-    return result
+    return (convtNum,convtUnit)
+}
+func Convert (str: String) -> String {
+    //입력값 2개 받는 함수(공백으로 구분)
+    let inputval = GetVal_ConvertVal(value: "\(str)")
+    let sepValue = SeperateUnit(value: "\(inputval.inputVal)")
+    let convertUnit = inputval.convertUnit
+    
+    let result = UnitConvertor(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: convertUnit)
+    if(result.num==0.0 && result.convertUnit==""){
+        return ""
+    }
+    return String(result.num)+result.convertUnit
 }
 
 print("값 입력: ")
@@ -52,3 +103,5 @@ if let inputValue = readLine(){
     let result = Convert(str: inputValue)
     print("\(result)","")
 }
+
+
