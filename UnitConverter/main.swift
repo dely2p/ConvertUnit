@@ -14,6 +14,14 @@ var lengthDic = ["cm": 1, "m": 100, "inch": 2.54, "yard": 91.44]
 var weightDic = ["g": 1, "kg": 1000, "oz": 0.02835, "lb": 0.453592]
 var volumeDic = ["l": 1, "pt": 0.473176, "qt": 0.946353, "gal": 3.78541]
 
+//extension Double {
+//    func roundOfPosit( posit: Int ) -> Double {
+//        let div = pow(10.0, Double(posit))
+//        let value = self * div
+//        return round(value) / div
+//    }
+//}
+
 protocol Units {
     var unit: String { get set }
     func baseToAny(num: Double, convertUnit: String) -> Double
@@ -142,7 +150,7 @@ class UnitConverter {
             if unit == inputUnit {
                 continue
             }else{
-                noConvertUnitResult += String(result) + unit + "\n"
+                noConvertUnitResult += String(format: "%5.2f", result) + unit + "\n"
             }
         }
 
@@ -197,23 +205,23 @@ func convert (str: String) -> String {
     let inputVal = inputWholeStr.seperateInputValConvertUnit(value: "\(str)")
     let sepValue = inputWholeStr.seperateNumberUnit(value: "\(inputVal.inputVal)")
     let sepUnits = inputWholeStr.seperateConvertUnit(value: "\(inputVal.convertUnit)")
-    var cnt = sepUnits.count
+    var convertUnitCnt = sepUnits.count
     let convertor = UnitConverter(inputUnit: sepValue.unit)
     var convertResult: String = ""
     
     if inputVal.convertUnit == " " {
-        cnt = 0
+        convertUnitCnt = 0
     }
     
-    switch cnt {
-    case 0:
-        convertResult = convertor.noConvertUnit(num: sepValue.num, inputUnit: sepValue.unit)
-    case 1:
-        convertResult = convertor.oneConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: inputVal.convertUnit)
-    case 2:
-        convertResult = convertor.manyConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: sepUnits)
-    default:
-        print("error")
+    switch convertUnitCnt {
+        case 0:
+            convertResult = convertor.noConvertUnit(num: sepValue.num, inputUnit: sepValue.unit)
+        case 1:
+            convertResult = convertor.oneConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: inputVal.convertUnit)
+        case 2:
+            convertResult = convertor.manyConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: sepUnits)
+        default:
+            print("error")
     }
     return convertResult
 }
