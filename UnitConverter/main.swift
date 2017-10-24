@@ -11,94 +11,61 @@ import Foundation
 var PLAY = true
 //let Units = ["inch", "cm", "m", "yard", "g", "kg", "lb", "oz", "l", "pt", "qt", "gal"]
 
-enum LengthConvertValue: Double {
-    case CmToM = 0.01
-    case CmToYard = 0.010936
-    case MToCm = 100
-    case MToInch = 39.370079
-    case InchToM = 0.0254
-    case YardToCm = 91.44
-}
-enum WeightConvertValue: Double {
-    case GTokg = 0.001
-    case KgToG = 1000
-    case OzToKg = 0.0283495
-    case LbToKg = 0.453592
-    case KgToOz = 35.273962
-    case KgToLb = 2.204623
-}
-enum VolumeConvertValue: Double {
-    case LToPT = 2.113379
-    case LToQt = 1.056688
-    case LToGal = 0.264172
-    case PtToL = 0.473176
-    case QtToL = 0.946353
-    case GalToL = 3.78541
+var lengthDic = ["cm": 1, "m": 100, "inch": 2.54, "yard": 91.44]
+var weightDic = ["g": 1, "kg": 1000, "oz": 0.02835, "lb": 0.453592]
+var volumeDic = ["l": 1, "pt": 0.473176, "qt": 0.946353, "gal": 3.78541]
+
+protocol Units {
+    var unit: String { get set }
+    func baseToAny(num: Double, convertUnit: String) -> Double
+    func anyToBase(num: Double, inputUnit: String) -> Double
 }
 
-
-class Length {
-    static func cmToM(_ value: Double) -> Double {
-        return value * LengthConvertValue.CmToM.rawValue
+class Length: Units {
+    var unit: String
+    
+    init() {
+        unit = "cm"
     }
-    static func cmToYard(_ value: Double) -> Double {
-        return value * LengthConvertValue.CmToYard.rawValue
+    
+    func baseToAny(num: Double, convertUnit: String) -> Double {
+        return num / lengthDic[lengthDic.index(forKey: convertUnit)!].value
     }
-    static func inchToM(_ value: Double) -> Double {
-        return value * LengthConvertValue.InchToM.rawValue
-    }
-    static func mToInch(_ value: Double) -> Double {
-        return value * LengthConvertValue.MToInch.rawValue
-    }
-    static func yardToCm(_ value: Double) -> Double {
-        return value * LengthConvertValue.YardToCm.rawValue
-    }
-    static func mToCm(_ value: Double) -> Double {
-        return value * LengthConvertValue.MToCm.rawValue
+    func anyToBase(num: Double, inputUnit: String) -> Double {
+        return num * lengthDic[lengthDic.index(forKey: inputUnit)!].value
     }
 }
 
-class Weight {
-    static func gTokg(_ value: Double) -> Double {
-        return value * WeightConvertValue.GTokg.rawValue
+class Weight: Units {
+    var unit: String
+    
+    init() {
+        unit = "kg"
     }
-    static func kgToG(_ value: Double) -> Double {
-        return value * WeightConvertValue.KgToG.rawValue
+    
+    func baseToAny(num: Double, convertUnit: String) -> Double {
+        return num / weightDic[weightDic.index(forKey: convertUnit)!].value
     }
-    static func kgToLb(_ value: Double) -> Double {
-        return value * WeightConvertValue.KgToLb.rawValue
-    }
-    static func kgToOz(_ value: Double) -> Double {
-        return value * WeightConvertValue.KgToOz.rawValue
-    }
-    static func lbToKg(_ value: Double) -> Double {
-        return value * WeightConvertValue.LbToKg.rawValue
-    }
-    static func ozToKg(_ value: Double) -> Double {
-        return value * WeightConvertValue.OzToKg.rawValue
+    func anyToBase(num: Double, inputUnit: String) -> Double {
+        return num * weightDic[weightDic.index(forKey: inputUnit)!].value
     }
 }
 
-class Volume {
-    static func galToL(_ value: Double) -> Double {
-        return value * VolumeConvertValue.GalToL.rawValue
+class Volume: Units {
+    var unit: String
+    
+    init() {
+        unit = "l"
     }
-    static func lToGal(_ value: Double) -> Double {
-        return value * VolumeConvertValue.LToGal.rawValue
+    
+    func baseToAny(num: Double, convertUnit: String) -> Double {
+        return num / volumeDic[volumeDic.index(forKey: convertUnit)!].value
     }
-    static func lToPT(_ value: Double) -> Double {
-        return value * VolumeConvertValue.LToPT.rawValue
-    }
-    static func lToQt(_ value: Double) -> Double {
-        return value * VolumeConvertValue.LToQt.rawValue
-    }
-    static func ptToL(_ value: Double) -> Double {
-        return value * VolumeConvertValue.PtToL.rawValue
-    }
-    static func qtToL(_ value: Double) -> Double {
-        return value * VolumeConvertValue.QtToL.rawValue
+    func anyToBase(num: Double, inputUnit: String) -> Double {
+        return num * volumeDic[volumeDic.index(forKey: inputUnit)!].value
     }
 }
+
 class Seperate {
     // seperate inputvalue and convert unit(" ")
     func seperateInputValConvertUnit(value: String)-> (inputVal: String, convertUnit: String){
@@ -129,81 +96,138 @@ class Seperate {
     }
     
     // seperate units(,)
-    func seperateConvertUnit(value: String) -> Array<Substring> {
+    func seperateConvertUnit(value: String) -> Array<String> {
         let Units = value.split(separator: ",")
-        return Units
+        return Units.map(String.init)
     }
 }
 
 // convert each unit
 class UnitConverter {
 
+    var unitDic: [String : Double] = [:]
+    var kindOfUnit: Units = Length()
+    var baseUnit: String
+
+    //단위의 종류를 분류(길이,무게,부피)하고 변환한다.
+    init(inputUnit: String) {
+        baseUnit = kindOfUnit.unit
+        if lengthDic.keys.contains(inputUnit) {
+            kindOfUnit = Length()
+            unitDic = lengthDic
+        }else if weightDic.keys.contains(inputUnit){
+            kindOfUnit = Weight()
+            unitDic = weightDic
+        }else if volumeDic.keys.contains(inputUnit){
+            kindOfUnit = Volume()
+            unitDic = volumeDic
+        }
+    }
+    
     //show every convert units
     func noConvertUnit(num: Double, inputUnit: String) {
-        
+        //-> (num: Array<Double>, convertUnit: Array<String>) {
+        var numArr = [Double]()
+        var unitArr = [String]()
+        //var result: Double
+
+        for unit in unitDic.keys {
+            var result: Double
+            if inputUnit == baseUnit {
+                result = kindOfUnit.baseToAny(num: num, convertUnit: unit)
+            }else if unit == baseUnit {
+                result = kindOfUnit.anyToBase(num: num, inputUnit: inputUnit)
+            }else {
+                let tmp = kindOfUnit.anyToBase(num: num, inputUnit: inputUnit)
+                result = kindOfUnit.baseToAny(num: tmp, convertUnit: unit)
+            }
+            numArr.append(result)
+            unitArr.append(unit)
+            if unit == inputUnit {
+                continue
+            }else{
+                print(result,unit)
+            }
+        }
+
+        //return (numArr, unitArr)
     }
     //show one convert unit
-    func oneConvertUnit(num: Double, inputUnit: String, convertUnit: String) -> (num: Double, convertUnit: String) {
-        var convtNum = 0.0
-        var convtUnit = convertUnit
-        var tmp = 0.0
+    func oneConvertUnit(num: Double, inputUnit: String, convertUnit: String) {
         
-        //inputUnit -> convertUnit
-        switch (inputUnit,convertUnit){
-        case ("cm","m"): convtNum = Length.cmToM(num)
-        //case ("cm"," "): convtNum = Length.cmToM(num); convtUnit = "m"
-        case ("m","cm"): convtNum = Length.mToCm(num)
-        //case ("m", " "): convtNum = Length.mToCm(num); convtUnit = "cm"
-        case ("cm","inch"): tmp = Length.cmToM(num); convtNum = Length.mToInch(tmp)
-        case ("inch","cm"): tmp = Length.inchToM(num); convtNum = Length.mToCm(tmp)
-        case ("m","inch"): convtNum = Length.mToInch(num)
-        case ("inch","m"): convtNum = Length.inchToM(num)
-        case ("yard","m"): tmp = Length.yardToCm(num); convtNum = Length.cmToM(tmp)
-        //case ("yard"," "): tmp = Length.yardToCm(num); convtNum = Length.cmToM(tmp); convtUnit = "m"
-        case ("m","yard"): tmp = Length.mToCm(num); convtNum = Length.cmToYard(tmp)
-            
-        case ("g","kg"): convtNum = Weight.gTokg(num)
-        case ("kg","g"): convtNum = Weight.kgToG(num)
-        case ("kg","lb"): convtNum = Weight.kgToLb(num)
-        case ("kg","oz"): convtNum = Weight.kgToOz(num)
-        case ("lb","kg"): convtNum = Weight.lbToKg(num)
-        case ("oz","kg"): convtNum = Weight.ozToKg(num)
-            
-        case ("gal","l"): convtNum = Volume.galToL(num)
-        case ("l","gal"): convtNum = Volume.lToGal(num)
-        case ("l","pt"): convtNum = Volume.lToPT(num)
-        case ("l","qt"): convtNum = Volume.lToQt(num)
-        case ("pt","l"): convtNum = Volume.ptToL(num)
-        case ("qt","l"): convtNum = Volume.qtToL(num)
-            
-        default:
-            print("지원하지 않는 단위입니다.")
+    //}-> (num: Double, convertUnit: String) {
+        let baseUnit = kindOfUnit.unit
+        var result: Double
+        
+        if inputUnit == baseUnit {
+            result = kindOfUnit.baseToAny(num: num, convertUnit: convertUnit)
+        }else if convertUnit == baseUnit {
+            result = kindOfUnit.anyToBase(num: num, inputUnit: inputUnit)
+        }else {
+            let tmp = kindOfUnit.anyToBase(num: num, inputUnit: inputUnit)
+            result = kindOfUnit.baseToAny(num: tmp, convertUnit: convertUnit)
         }
-        
-        return (convtNum,convtUnit)
-
+        print(result,baseUnit)
+        //return (result, convertUnit)
     }
     //show input each convert unit
-    func manyConvertUnit(num: Double, inputUnit: String, convertUnit: Array<String>){
+    func manyConvertUnit(num: Double, inputUnit: String, convertUnit: Array<String>) {
         
+//    } -> (num: Array<Double>, convertUnit: Array<String>){
+        var numArr = [Double]()
+        var unitArr = [String]()
+        
+        for unit in convertUnit {
+            var result: Double
+            if inputUnit == baseUnit {
+                result = kindOfUnit.baseToAny(num: num, convertUnit: unit)
+            }else if unit == baseUnit {
+                result = kindOfUnit.anyToBase(num: num, inputUnit: inputUnit)
+            }else {
+                let tmp = kindOfUnit.anyToBase(num: num, inputUnit: inputUnit)
+                result = kindOfUnit.baseToAny(num: tmp, convertUnit: unit)
+            }
+            numArr.append(result)
+            unitArr.append(unit)
+            print(result,unit)
+        }
+        //return (numArr, unitArr)
     }
 }
 
 // operate func
-func convert (str: String) -> String {
-    let inputWholeStr = Seperate()
-    let inputval = inputWholeStr.seperateInputValConvertUnit(value: "\(str)")
-    let sepValue = inputWholeStr.seperateNumberUnit(value: "\(inputval.inputVal)")
-    //let sepUnits = inputWholeStr.seperateConvertUnit(value: "\(inputval.convertUnit)")
-
-    let convertUnit = inputval.convertUnit
+func convert (str: String) {
+   // -> String {
     
-    let converter = UnitConverter()
-    let result = converter.oneConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: convertUnit)
-    if(result.num == 0.0 && result.convertUnit == ""){
-        return ""
+    let inputWholeStr = Seperate()
+    let inputVal = inputWholeStr.seperateInputValConvertUnit(value: "\(str)")
+    let sepValue = inputWholeStr.seperateNumberUnit(value: "\(inputVal.inputVal)")
+    let sepUnits = inputWholeStr.seperateConvertUnit(value: "\(inputVal.convertUnit)")
+    var cnt = sepUnits.count
+    let convertor = UnitConverter(inputUnit: sepValue.unit)
+    
+    if inputVal.convertUnit == " " {
+        cnt = 0
     }
-    return String(result.num) + result.convertUnit
+    
+    switch cnt {
+    case 0:
+        convertor.noConvertUnit(num: sepValue.num, inputUnit: sepValue.unit)
+    case 1:
+        convertor.oneConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: inputVal.convertUnit)
+    case 2:
+        convertor.manyConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: sepUnits)
+    default:
+        print("error")
+    }
+    //let convertUnit = inputval.convertUnit
+    
+//    let converter = UnitConverter(inputUnit: sepValue.unit)
+//    let result = converter.oneConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: convertUnit)
+//    if(result.num == 0.0 && result.convertUnit == ""){
+//        return ""
+//    }
+    //return String(result.num) + result.convertUnit
 }
 
 func prompt() {
@@ -215,8 +239,9 @@ func prompt() {
         if inputValue == "q" || inputValue == "quit" {
             PLAY = false
         }else if inputValue != nil {
-            let result = convert(str: inputValue!)
-            print("\(result)","")
+            convert(str: inputValue!)
+            //let result = convert(str: inputValue!)
+            //print("\(result)","")
         }
     }while PLAY
 }
