@@ -101,21 +101,20 @@ class Volume {
 }
 // seperate inputvalue to number and unit
 func seperateNumberUnit (value: String) -> (num: Double, unit: String) {
-    var unit: Substring = ""
-    var num: Double? = nil
-    let unit_size = Units.count
-    for i in 0..<unit_size {
-        if value.contains(Units[i]){
-            let unitCnt = Units[i].count
-            let sep = value.index(value.endIndex,offsetBy:(-unitCnt))
-            print("sep : ", sep)
-            num = Double(value[value.startIndex..<sep])
-            unit = value[sep..<value.endIndex]
-            break
+    var cnt = 0
+    
+    for i in value {
+        if (i >= "a" && i <= "z") || (i >= "A" && i <= "Z") { //word
+            break;
         }else {
-            print(Units[i], "없음")
+            cnt += 1;
         }
     }
+    
+    let numIndex = value.index(value.startIndex, offsetBy: cnt)
+    let num = Double(value[value.startIndex..<numIndex])
+    let unit = value[numIndex..<value.endIndex]
+
     return (num!,String(unit))
 }
 
