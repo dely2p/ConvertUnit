@@ -9,7 +9,6 @@
 import Foundation
 
 var PLAY = true
-//let Units = ["inch", "cm", "m", "yard", "g", "kg", "lb", "oz", "l", "pt", "qt", "gal"]
 
 var lengthDic = ["cm": 1, "m": 100, "inch": 2.54, "yard": 91.44]
 var weightDic = ["g": 1, "kg": 1000, "oz": 0.02835, "lb": 0.453592]
@@ -23,7 +22,6 @@ protocol Units {
 
 class Length: Units {
     var unit: String
-    
     init() {
         unit = "cm"
     }
@@ -38,7 +36,6 @@ class Length: Units {
 
 class Weight: Units {
     var unit: String
-    
     init() {
         unit = "kg"
     }
@@ -53,7 +50,6 @@ class Weight: Units {
 
 class Volume: Units {
     var unit: String
-    
     init() {
         unit = "l"
     }
@@ -66,6 +62,7 @@ class Volume: Units {
     }
 }
 
+// seperate input string
 class Seperate {
     // seperate inputvalue and convert unit(" ")
     func seperateInputValConvertUnit(value: String)-> (inputVal: String, convertUnit: String){
@@ -109,7 +106,6 @@ class UnitConverter {
     var kindOfUnit: Units = Length()
     var baseUnit: String
 
-    //단위의 종류를 분류(길이,무게,부피)하고 변환한다.
     init(inputUnit: String) {
         baseUnit = kindOfUnit.unit
         if lengthDic.keys.contains(inputUnit) {
@@ -125,10 +121,10 @@ class UnitConverter {
     }
     
     //show every convert units
-    func noConvertUnit(num: Double, inputUnit: String) {
-        //-> (num: Array<Double>, convertUnit: Array<String>) {
+    func noConvertUnit(num: Double, inputUnit: String) -> String {
         var numArr = [Double]()
         var unitArr = [String]()
+        var noConvertUnitResult: String = ""
         //var result: Double
 
         for unit in unitDic.keys {
@@ -146,18 +142,17 @@ class UnitConverter {
             if unit == inputUnit {
                 continue
             }else{
-                print(result,unit)
+                noConvertUnitResult += String(result) + unit + "\n"
             }
         }
 
-        //return (numArr, unitArr)
+        return noConvertUnitResult
     }
     //show one convert unit
-    func oneConvertUnit(num: Double, inputUnit: String, convertUnit: String) {
-        
-    //}-> (num: Double, convertUnit: String) {
+    func oneConvertUnit(num: Double, inputUnit: String, convertUnit: String) -> String {
         let baseUnit = kindOfUnit.unit
         var result: Double
+        var oneConvertUnitResult: String = ""
         
         if inputUnit == baseUnit {
             result = kindOfUnit.baseToAny(num: num, convertUnit: convertUnit)
@@ -167,13 +162,13 @@ class UnitConverter {
             let tmp = kindOfUnit.anyToBase(num: num, inputUnit: inputUnit)
             result = kindOfUnit.baseToAny(num: tmp, convertUnit: convertUnit)
         }
-        print(result,baseUnit)
-        //return (result, convertUnit)
+        oneConvertUnitResult += String(result) + baseUnit
+        return oneConvertUnitResult
     }
+    
     //show input each convert unit
-    func manyConvertUnit(num: Double, inputUnit: String, convertUnit: Array<String>) {
-        
-//    } -> (num: Array<Double>, convertUnit: Array<String>){
+    func manyConvertUnit(num: Double, inputUnit: String, convertUnit: Array<String>) -> String {
+        var manyConvertUnitResult: String = ""
         var numArr = [Double]()
         var unitArr = [String]()
         
@@ -189,15 +184,14 @@ class UnitConverter {
             }
             numArr.append(result)
             unitArr.append(unit)
-            print(result,unit)
+            manyConvertUnitResult += String(result) + unit + "\n"
         }
-        //return (numArr, unitArr)
+        return manyConvertUnitResult
     }
 }
 
 // operate func
-func convert (str: String) {
-   // -> String {
+func convert (str: String) -> String {
     
     let inputWholeStr = Seperate()
     let inputVal = inputWholeStr.seperateInputValConvertUnit(value: "\(str)")
@@ -205,6 +199,7 @@ func convert (str: String) {
     let sepUnits = inputWholeStr.seperateConvertUnit(value: "\(inputVal.convertUnit)")
     var cnt = sepUnits.count
     let convertor = UnitConverter(inputUnit: sepValue.unit)
+    var convertResult: String = ""
     
     if inputVal.convertUnit == " " {
         cnt = 0
@@ -212,40 +207,39 @@ func convert (str: String) {
     
     switch cnt {
     case 0:
-        convertor.noConvertUnit(num: sepValue.num, inputUnit: sepValue.unit)
+        convertResult = convertor.noConvertUnit(num: sepValue.num, inputUnit: sepValue.unit)
     case 1:
-        convertor.oneConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: inputVal.convertUnit)
+        convertResult = convertor.oneConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: inputVal.convertUnit)
     case 2:
-        convertor.manyConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: sepUnits)
+        convertResult = convertor.manyConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: sepUnits)
     default:
         print("error")
     }
-    //let convertUnit = inputval.convertUnit
-    
-//    let converter = UnitConverter(inputUnit: sepValue.unit)
-//    let result = converter.oneConvertUnit(num: sepValue.num, inputUnit: sepValue.unit, convertUnit: convertUnit)
-//    if(result.num == 0.0 && result.convertUnit == ""){
-//        return ""
-//    }
-    //return String(result.num) + result.convertUnit
+    return convertResult
 }
-
-func prompt() {
-    var inputValue: String? = ""
-    repeat{
+class Main{
+    var result: String
+    init() {
+        result = ""
+    }
+    
+    func prompt(){
+        var inputValue: String? = ""
+        repeat{
         print("값 입력: ")
         inputValue = readLine()
         
         if inputValue == "q" || inputValue == "quit" {
             PLAY = false
         }else if inputValue != nil {
-            convert(str: inputValue!)
-            //let result = convert(str: inputValue!)
-            //print("\(result)","")
+            result = convert(str: inputValue!)
+            mainPrint()
         }
-    }while PLAY
+        }while PLAY
+    }
+    func mainPrint(){
+        print(result)
+    }
 }
-
-prompt()
-
-
+var main = Main()
+main.prompt()
